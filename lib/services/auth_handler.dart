@@ -19,8 +19,8 @@ class _AuthHandlerState extends ConsumerState<AuthHandler> {
   }
 
   Future<User?> getUser() async {
-    final user = await Supabase.instance.client.auth.getUser();
-    return user.user;
+    final user = await Supabase.instance.client.auth.currentUser;
+    return user;
   }
 
   @override
@@ -37,7 +37,7 @@ class _AuthHandlerState extends ConsumerState<AuthHandler> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text('An error occurred'),
+              child: Text('Error: ${snapshot.error}'),
             );
           }
 

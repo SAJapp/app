@@ -20,10 +20,9 @@ class App extends StatelessWidget {
   @override
   Widget build(context) {
     return MaterialApp(
+      themeMode: ThemeMode.dark,
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('Hello World'),
-        ),
         body: LandingPage(),
       ),
     );

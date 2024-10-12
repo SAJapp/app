@@ -9,40 +9,51 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Dummy data
-  List<Map<String, String>> items = [
-    {'item_name': 'Laptop', 'price': '\$30'},
-    {'item_name': 'T-Shirt - Size M', 'price': '\$10'},
-    {'item_name': 'Calculus Textbook', 'price': '\$40'},
-    {'item_name': 'Jacket - Size L', 'price': '\$25'},
+  List<Map<String, dynamic>> items = [
+    {
+      'item_name': 'Laptop',
+      'price': '\$30',
+      // stock
+      'image': "https://via.placeholder.com/150",
+      'rating': 4.5,
+    },
+    {
+      'item_name': 'T-Shirt - Size M',
+      'price': '\$10',
+      'image': "https://via.placeholder.com/150",
+      'rating': 4.0,
+    },
+    {
+      'item_name': 'Calculus Textbook',
+      'price': '\$40',
+      'image': "https://via.placeholder.com/150",
+      'rating': 4.8,
+    },
+    {
+      'item_name': 'Jacket - Size L',
+      'price': '\$25',
+      'image': "https://via.placeholder.com/150",
+      'rating': 4.2,
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // No back arrow on this screen
-        backgroundColor: Colors.white,
-        elevation: 0, // No shadow for flat look
+        automaticallyImplyLeading: false,
+        elevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Campus Card on the left
             Text(
               'Campus Cart',
-              style: TextStyle(fontSize: 18, color: Colors.black),
+              style: TextStyle(
+                  fontSize: 22, color: Theme.of(context).primaryColor),
             ),
-
-            // Search bar in the center
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildSearchBar(),
-              ),
-            ),
-
-            // Account icon on the right
             IconButton(
-              icon: Icon(LucideIcons.user),
+              icon: Icon(LucideIcons.user,
+                  color: Theme.of(context).iconTheme.color),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -58,12 +69,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row of tags
+            _buildSearchBar(),
+            SizedBox(height: 16),
             _buildTags(),
-
-            SizedBox(height: 16), // Space between tags and item list
-
-            // List of items with price and action buttons
+            SizedBox(height: 16),
             Expanded(child: _buildItemList()),
           ],
         ),
@@ -71,18 +80,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Build search bar with search icon, text field, and filter button
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(5),
+        color: Theme.of(context).inputDecorationTheme.fillColor,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(LucideIcons.search, color: Colors.grey),
+            padding: const EdgeInsets.all(12.0),
+            child: Icon(LucideIcons.search,
+                color: Theme.of(context).iconTheme.color),
           ),
           Expanded(
             child: TextField(
@@ -93,7 +102,8 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.filter_list, color: Colors.grey),
+            icon: Icon(Icons.filter_list,
+                color: Theme.of(context).iconTheme.color),
             onPressed: () {
               // TODO: Add filter functionality
             },
@@ -103,7 +113,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Build tags for categories
   Widget _buildTags() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -117,7 +126,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Build each tag (category) as a flat button
   Widget _buildTag(String label) {
     return GestureDetector(
       onTap: () {
@@ -126,64 +134,76 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: Theme.of(context).colorScheme.secondary,
           borderRadius: BorderRadius.circular(5),
         ),
         child: Text(
           label,
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+              color: Theme.of(context).primaryTextTheme.bodyMedium?.color),
         ),
       ),
     );
   }
 
-  // Build the list of items (dummy data)
   Widget _buildItemList() {
-    return ListView.builder(
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 1,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
         return Container(
-          margin: EdgeInsets.symmetric(vertical: 8),
-          padding: EdgeInsets.all(12.0),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey[300]!),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Add blank image as the first item in the column
-              Container(
-                width: double.infinity, // Full width of the card
-                height: 150, // Height for the image placeholder
-                color: Colors.grey[200], // Placeholder color
-                child: Center(
-                  child: Icon(
-                    Icons.image,
-                    size: 50,
-                    color: Colors.grey[600],
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(10)),
+                    image: DecorationImage(
+                      image: NetworkImage(item['image']),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
-              SizedBox(height: 8), // Space between image and item name
-
-              // Item name
-              Text(
-                item['item_name']!,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  item['item_name'],
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'Price: ${item['price']}',
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.amber, size: 16),
+                    Text('${item['rating']}',
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color)),
+                  ],
+                ),
               ),
               SizedBox(height: 8),
-
-              // Item price
-              Text(
-                'Price: ${item['price']}',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              SizedBox(height: 8),
-
-              // Save and Chat buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -193,7 +213,8 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Save'),
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.grey[200],
+                      backgroundColor:
+                          Theme.of(context).inputDecorationTheme.fillColor,
                     ),
                   ),
                   SizedBox(width: 8),
@@ -201,9 +222,9 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       // TODO: Chat functionality
                     },
-                    child: Text('Chat', style: TextStyle(color: Colors.white)),
+                    child: Text('Ping', style: TextStyle(color: Colors.white)),
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],

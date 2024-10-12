@@ -1,4 +1,6 @@
+import 'package:campus_thrift/pages/home/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -39,7 +41,15 @@ class _HomePageState extends State<HomePage> {
             ),
 
             // Account icon on the right
-            Icon(Icons.account_circle, size: 28, color: Colors.grey),
+            IconButton(
+              icon: Icon(LucideIcons.user),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -72,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Icon(Icons.search, color: Colors.grey),
+            child: Icon(LucideIcons.search, color: Colors.grey),
           ),
           Expanded(
             child: TextField(

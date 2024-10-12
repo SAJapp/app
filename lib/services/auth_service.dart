@@ -14,6 +14,13 @@ class AuthService extends StateNotifier<AuthStateData> {
 
   get user => state.user;
 
+  init() {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      state = AuthStateData(user: user);
+    }
+  }
+
   void setUser(User? user) {
     state = AuthStateData(user: user);
   }
@@ -41,6 +48,11 @@ class AuthService extends StateNotifier<AuthStateData> {
         'id': response.user!.id,
         'display_name': displayName,
       });
+
+      state = AuthStateData(user: response.user);
+
+      await Supabase.instance.client.auth
+          .updateUser(UserAttributes(data: {'display_name': displayName}));
     }
   }
 

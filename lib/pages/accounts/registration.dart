@@ -138,6 +138,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   @override
   Widget build(BuildContext context) {
+    var auth = ref.watch(authServiceProvider.notifier);
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -224,11 +226,13 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                     _formKey.currentState!.save();
                     // TODO: Add registration functionality
 
-                    await ref
-                        .read(authServiceProvider.notifier)
-                        .register(_name!, _email!, _password!);
+                    await ref.read(authServiceProvider.notifier).register(
+                          _email!,
+                          _password!,
+                          _name!,
+                        );
 
-                    if (ref.read(authServiceProvider.notifier).user != null) {
+                    if (auth.isAuthenticated == true) {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => AuthHandler()),

@@ -1,29 +1,24 @@
+import 'package:campus_thrift/pages/rail.dart';
+import 'package:campus_thrift/services/auth_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:campus_thrift/services/auth_service.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LoginPage(), // Default route is the LoginPage
-    );
-  }
-}
-
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   LoginPage({Key? key}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   String? _email, _password;
 
   @override
   Widget build(BuildContext context) {
+    var auth = ref.watch(authServiceProvider.notifier);
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -89,11 +84,22 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
                     // TODO: Add login functionality
-                    print('Email: $_email, Password: $_password');
+
+                    await ref.read(authServiceProvider.notifier).login(
+                          _email!,
+                          _password!,
+                        );
+
+                    if (auth.isAuthenticated == true) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => AuthHandler()),
+                      );
+                    }
                   }
                 },
                 child: Text('Login', style: TextStyle(fontSize: 18)),
@@ -119,14 +125,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-class RegistrationPage extends StatefulWidget {
+class RegistrationPage extends ConsumerStatefulWidget {
   RegistrationPage({Key? key}) : super(key: key);
 
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
+class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   String? _name, _email, _password;
 
@@ -213,11 +219,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
                     // TODO: Add registration functionality
-                    print('Name: $_name, Email: $_email, Password: $_password');
+
+                    await ref
+                        .read(authServiceProvider.notifier)
+                        .register(_name!, _email!, _password!);
+
+                    if (ref.read(authServiceProvider.notifier).user != null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => AuthHandler()),
+                      );
+                    }
                   }
                 },
                 child: Text('Register', style: TextStyle(fontSize: 18)),

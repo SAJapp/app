@@ -27,62 +27,31 @@ class _SocialPageState extends State<SocialPage> {
     super.dispose();
   }
 
-  // Function to load posts from Supabase
-  // Future<void> _loadPosts() async {
-  //   if (isLoading) return; // Prevent multiple API calls at once
-  //   setState(() {
-  //     isLoading = true;
-  //   });
+  Future<void> _loadPosts() async {
+    if (isLoading) return; // Prevent multiple API calls at once
+    setState(() {
+      isLoading = true;
+    });
 
-  //   final response = await supabase
-  //       .from('posts')
-  //       .select()
-  //       .order('timestamp', ascending: false)
-  //       .range(page * pageSize, (page + 1) * pageSize - 1) // Pagination
-  //       .execute();
+    final response = await Supabase.instance.client
+        .from('posts')
+        .select()
+        .order('created_at', ascending: false)
+        .range(page * pageSize, (page + 1) * pageSize - 1) // Pagination
+        .select();
 
-  //   if (response.error == null) {
-  //     setState(() {
-  //       posts.addAll(response.data);
-  //       page++; // Increment page for next batch
-  //     });
-  //   } else {
-  //     // Handle error
-  //     print("Error: ${response.error!.message}");
-  //   }
+    setState(() {
+      isLoading = false;
+    });
+  }
 
-  //   setState(() {
-  //     isLoading = false;
-  //   });
-  // }
-
-  // // Infinite scrolling detection
-  // void _onScroll() {
-  //   if (_scrollController.position.pixels ==
-  //       _scrollController.position.maxScrollExtent) {
-  //     _loadPosts();
-  //   }
-  // }
-  //
-  // dummy data
-
-  Map<String, dynamic> post1 = {
-    'id': 1,
-    'username': 'John Doe',
-    'content': 'Hello, World!',
-    'likes': 10,
-    'comments': 5,
-    'timestamp': DateTime.now().toIso8601String(),
-  };
-
-  Map<String, dynamic> post2 = {
-    'id': 2,
-    'username': 'Jane Doe',
-    'content': 'This is a test post',
-    'likes': 20,
-    'comments': 10,
-    'timestamp': DateTime.now().toIso8601String(),
-  };
+  // Infinite scrolling detection
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      _loadPosts();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

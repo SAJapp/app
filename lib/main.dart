@@ -5,10 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Supabase.initialize(
-  //   url: 'https://<your_supabase_url>',
-  //   anonKey: '<your_supabase_anon_key>',
-  // );
+  await Supabase.initialize(
+    url: 'https://xfgryarmntclonzbyllo.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZ3J5YXJtbnRjbG9uemJ5bGxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg3NTg1MjksImV4cCI6MjA0NDMzNDUyOX0.EPjoh6zDazbjyFsmoHsnL6rQYzveFDqaA_pYPPR9e5s',
+  );
 
   runApp(ProviderScope(child: App()));
 }

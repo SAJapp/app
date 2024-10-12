@@ -12,18 +12,36 @@ class AuthService extends StateNotifier<AuthStateData> {
 
   get isAuthenticated => state.user != null;
 
+  get user => state.user;
+
   void setUser(User? user) {
     state = AuthStateData(user: user);
   }
 
-  void login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     final response = await Supabase.instance.client.auth
         .signInWithPassword(email: email, password: password);
+
+    if (response.user != null) {
+      state = AuthStateData(user: response.user);
+    }
   }
 
-  void register(String email, String password) async {
+  Future<void> register(
+    String email,
+    String password,
+    String? displayName,
+  ) async {
     final response = await Supabase.instance.client.auth
         .signUp(email: email, password: password);
+
+    // add the display name to the user profile
+    if (response.user != null) {
+      await Supabase.instance.client.from('users').upsert({
+        'id': response.user!.id,
+        'display_name': displayName,
+      });
+    }
   }
 
   void logout() {

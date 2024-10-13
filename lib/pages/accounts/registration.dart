@@ -218,9 +218,9 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                     // TODO: Add registration functionality
 
                     await ref.read(authServiceProvider.notifier).register(
-                          _nameController.text,
                           _emailController.text,
                           _passwordController.text,
+                          _nameController.text,
                         );
 
                     if (auth.isAuthenticated == true) {

@@ -1,4 +1,4 @@
-# campus_thrift
+# campus_cart
 
 A new Flutter project.
 

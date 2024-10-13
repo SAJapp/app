@@ -1,21 +1,34 @@
-import 'package:campus_thrift/pages/landing/landing.dart';
+import 'package:campus_cart/pages/landing/landing.dart';
+import 'package:campus_cart/pages/rail.dart';
+import 'package:campus_cart/services/auth_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+late Supabase supabase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: 'assets/.env');
   await Supabase.initialize(
-    url: 'https://xfgryarmntclonzbyllo.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZ3J5YXJtbnRjbG9uemJ5bGxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg3NTg1MjksImV4cCI6MjA0NDMzNDUyOX0.EPjoh6zDazbjyFsmoHsnL6rQYzveFDqaA_pYPPR9e5s',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  runApp(ProviderScope(child: App()));
+  // Check onboarding status
+  final prefs = await SharedPreferences.getInstance();
+  bool isOnboarded = prefs.getBool('onboarded') ?? false;
+
+  supabase = Supabase.instance;
+  runApp(ProviderScope(child: App(isOnboarded: isOnboarded)));
 }
 
 class App extends StatelessWidget {
-  App({Key? key}) : super(key: key);
+  final bool isOnboarded;
+
+  App({Key? key, required this.isOnboarded}) : super(key: key);
 
   @override
   Widget build(context) {
@@ -23,7 +36,7 @@ class App extends StatelessWidget {
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: LandingPage(),
+        body: isOnboarded ? AuthHandler() : LandingPage(),
       ),
     );
   }

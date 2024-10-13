@@ -1,9 +1,9 @@
-import 'package:campus_thrift/pages/rail.dart';
-import 'package:campus_thrift/services/auth_handler.dart';
+import 'package:campus_cart/pages/rail.dart';
+import 'package:campus_cart/services/auth_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:campus_thrift/services/auth_service.dart';
+import 'package:campus_cart/services/auth_service.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -14,7 +14,8 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  String? _email, _password;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +39,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               SizedBox(height: 32),
               TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
@@ -51,12 +53,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _email = value;
-                },
               ),
               SizedBox(height: 16),
               TextFormField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -70,9 +70,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     return 'Password must be at least 6 characters long';
                   }
                   return null;
-                },
-                onSaved: (value) {
-                  _password = value;
                 },
               ),
               SizedBox(height: 32),
@@ -90,14 +87,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     // TODO: Add login functionality
 
                     await ref.read(authServiceProvider.notifier).login(
-                          _email!,
-                          _password!,
+                          _emailController.text,
+                          _passwordController.text,
                         );
 
                     if (auth.isAuthenticated == true) {
-                      Navigator.pushReplacement(
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => AuthHandler()),
+                        (route) => false,
                       );
                     }
                   }
@@ -134,7 +132,9 @@ class RegistrationPage extends ConsumerStatefulWidget {
 
 class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
-  String? _name, _email, _password;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -169,9 +169,6 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _name = value;
-                },
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -187,9 +184,6 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                     return 'Please enter a valid email address';
                   }
                   return null;
-                },
-                onSaved: (value) {
-                  _email = value;
                 },
               ),
               SizedBox(height: 16),
@@ -208,9 +202,6 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _password = value;
-                },
               ),
               SizedBox(height: 32),
               ElevatedButton(
@@ -227,15 +218,16 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                     // TODO: Add registration functionality
 
                     await ref.read(authServiceProvider.notifier).register(
-                          _email!,
-                          _password!,
-                          _name!,
+                          _nameController.text,
+                          _emailController.text,
+                          _passwordController.text,
                         );
 
                     if (auth.isAuthenticated == true) {
-                      Navigator.pushReplacement(
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => AuthHandler()),
+                        (route) => false,
                       );
                     }
                   }

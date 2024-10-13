@@ -1,4 +1,5 @@
-import 'package:campus_thrift/services/auth_service.dart';
+import 'package:campus_cart/services/auth_handler.dart';
+import 'package:campus_cart/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,7 +19,7 @@ class ProfilePage extends ConsumerWidget {
         child: ListView(
           children: [
             // Profile Picture Section
-            Center(
+            const Center(
               child: CircleAvatar(
                 radius: 50,
                 backgroundImage: NetworkImage(
@@ -39,7 +40,7 @@ class ProfilePage extends ConsumerWidget {
             SizedBox(height: 10),
 
             FutureBuilder<String?>(
-              future: _getDisplayName(user!.id),
+              future: _getDisplayName(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Card(
@@ -75,7 +76,7 @@ class ProfilePage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 // Implement edit profile functionality
-                _showEditProfileDialog(context, user.id);
+                _showEditProfileDialog(context);
               },
               child: Text('Edit Profile'),
             ),
@@ -88,6 +89,12 @@ class ProfilePage extends ConsumerWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Logged out successfully')),
                 );
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => AuthHandler()),
+                  (route) => false,
+                );
               },
               child: Text('Logout'),
             ),
@@ -98,22 +105,15 @@ class ProfilePage extends ConsumerWidget {
   }
 
   // Function to fetch display name from Supabase
-  Future<String?> _getDisplayName(String userId) async {
-    final response = await Supabase.instance.client
-        .from('users')
-        .select('display_name')
-        .eq('id', userId)
-        .single();
+  Future<String?> _getDisplayName() async {
+    final userInformation = await Supabase.instance.client.auth.getUser();
+    var displayName = userInformation.user!.userMetadata?['display_name'];
 
-    if (response.isEmpty) {
-      return null;
-    }
-
-    return response.entries.first.value.toString();
+    return displayName;
   }
 
   // Function to show edit profile dialog
-  void _showEditProfileDialog(BuildContext context, String userId) {
+  void _showEditProfileDialog(BuildContext context) {
     final TextEditingController _controller = TextEditingController();
 
     showDialog(
@@ -136,8 +136,8 @@ class ProfilePage extends ConsumerWidget {
               onPressed: () async {
                 final newDisplayName = _controller.text;
                 if (newDisplayName.isNotEmpty) {
-                  await Supabase.instance.client.from('users').update(
-                      {'display_name': newDisplayName}).eq('id', userId);
+                  await Supabase.instance.client.auth.updateUser(
+                      UserAttributes(data: {'display_name': newDisplayName}));
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Display name updated!')),

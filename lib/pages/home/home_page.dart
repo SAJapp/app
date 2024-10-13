@@ -1,4 +1,4 @@
-import 'package:campus_thrift/pages/home/profile.dart';
+import 'package:campus_cart/pages/home/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 

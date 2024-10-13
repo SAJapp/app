@@ -1,4 +1,4 @@
-import 'package:campus_thrift/services/auth_handler.dart';
+import 'package:campus_cart/services/auth_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

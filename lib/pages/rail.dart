@@ -1,6 +1,9 @@
-import 'package:campus_thrift/pages/home/home_page.dart';
-import 'package:campus_thrift/pages/home/social_page.dart';
+import 'package:campus_cart/pages/home/add_post.dart';
+import 'package:campus_cart/pages/home/bookmarks.dart';
+import 'package:campus_cart/pages/home/home_page.dart';
+
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class RailPage extends StatefulWidget {
   @override
@@ -35,7 +38,8 @@ class _RailPageState extends State<RailPage> {
         },
         children: [
           HomePage(), // Page 1
-          SocialPage(), // Page 2
+          Bookmarks(),
+          AddPostPage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -43,12 +47,16 @@ class _RailPageState extends State<RailPage> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(LucideIcons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Social',
+            icon: Icon(LucideIcons.bookmark),
+            label: 'Bookmarks',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(LucideIcons.plus),
+            label: 'Add Post',
           ),
         ],
       ),

@@ -62,7 +62,7 @@ class _AddPostPageState extends State<AddPostPage> {
             .upload(fileName, file,
                 fileOptions: FileOptions(cacheControl: '3600', upsert: false));
 
-        if (response.isEmpty) {
+        if (response == null) {
           throw Exception('Failed to upload image: $fileName');
         }
 
@@ -82,9 +82,10 @@ class _AddPostPageState extends State<AddPostPage> {
         'description': _descriptionController.text,
         'price': double.parse(_priceController.text),
         'condition': _selectedCondition,
-        'category': _selectedCategory,
+        'category': [_selectedCategory],
+        'university_id': 'cdda43aa-219a-4ab5-ae69-0a8d91f7264b',
         'pictures': uploadedImageUrls,
-      });
+      }, defaultToNull: true).select();
 
       if (response.isEmpty) {
         throw Exception('Failed to add post');

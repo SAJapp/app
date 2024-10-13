@@ -46,6 +46,7 @@ class AuthService extends StateNotifier<AuthStateData> {
     if (response.user != null) {
       await Supabase.instance.client.from('users').upsert({
         'id': response.user!.id,
+        'display_name': displayName,
       });
 
       // add display name to internal user profile

@@ -13,17 +13,46 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Future to hold the data fetching operation
-  Future<List<Map<String, dynamic>>> fetchItems() async {
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _items = [];
+  List<Map<String, dynamic>> _filteredItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchItems();
+    _searchController.addListener(_filterItems);
+  }
+
+  // Fetch items from Supabase
+  Future<void> _fetchItems() async {
     final response = await Supabase.instance.client
         .from('posts') // Replace with your actual table name
         .select();
 
-    if (response.isEmpty) {
-      return [];
+    if (response.isNotEmpty) {
+      setState(() {
+        _items = List<Map<String, dynamic>>.from(response);
+        _filteredItems = _items; // Initially show all items
+      });
     }
+  }
 
-    return response;
+  // Filter items based on the search query
+  void _filterItems() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredItems = _items.where((item) {
+        final title = item['title']?.toLowerCase() ?? '';
+        return title.contains(query);
+      }).toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -45,7 +74,6 @@ class _HomePageState extends State<HomePage> {
                   color: Theme.of(context).iconTheme.color),
               onPressed: () {
                 // Navigate to the chat page
-
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ChatListPage()),
@@ -75,45 +103,27 @@ class _HomePageState extends State<HomePage> {
             _buildTags(),
             SizedBox(height: 16),
             Expanded(
-              child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: fetchItems(), // Use the fetchItems method
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    // While the future is loading, show a loading indicator
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    // If there was an error fetching the data, show an error message
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    // Show empty icon if no items
-                    return Center(
+              child: _filteredItems.isEmpty
+                  ? Center(
                       child: Icon(
                         LucideIcons.trash,
                         size: 64,
                         color: Theme.of(context).iconTheme.color,
                       ),
-                    );
-                  }
-
-                  // If the future completed successfully, display the items
-                  final items = snapshot.data!;
-                  return GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 1,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
+                    )
+                  : GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 1,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: _filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final item = _filteredItems[index];
+                        return _buildItemCard(item);
+                      },
                     ),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return _buildItemCard(item);
-                    },
-                  );
-                },
-              ),
             ),
           ],
         ),
@@ -134,8 +144,9 @@ class _HomePageState extends State<HomePage> {
             child: Icon(LucideIcons.search,
                 color: Theme.of(context).iconTheme.color),
           ),
-          const Expanded(
+          Expanded(
             child: TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search for items',
                 border: InputBorder.none,
@@ -307,8 +318,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            // for each category in the item, display a badge
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Wrap(
@@ -318,55 +327,72 @@ class _HomePageState extends State<HomePage> {
                 }),
               ),
             ),
-            SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: () async {
-                    // add post to saved_posts array in user's document
+                item['author_id'] == supabase.client.auth.currentUser!.id
+                    ? TextButton(
+                        onPressed: () async {
+                          // delete the post
+                          await supabase.client
+                              .from('posts')
+                              .delete()
+                              .eq('id', item['id']);
+                        },
+                        child: Text('Delete'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                      )
+                    : TextButton(
+                        onPressed: () async {
+                          // add post to saved_posts array in user's document
 
-                    await supabase.client.from('bookmarks').upsert([
-                      {
-                        'owner': supabase.client.auth.currentUser!.id,
-                        'post_id': item['id'],
-                      }
-                    ]);
-                  },
-                  child: Text('Save'),
-                  style: TextButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).inputDecorationTheme.fillColor,
-                  ),
-                ),
-                SizedBox(width: 8),
-                TextButton(
-                  onPressed: () async {
-                    // add myself and the owner to the chat
-
-                    // create a new chat
-                    final chat = await supabase.client.from('chats').insert({
-                      'participants': [
-                        supabase.client.auth.currentUser!.id,
-                        item['author_id']
-                      ],
-                      'title':
-                          'Chat from ${supabase.client.auth.currentUser!.userMetadata?['display_name'] ?? supabase.client.auth.currentUser!.email}',
-                    }).select();
-
-                    // navigate to the chat screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatPage(chatId: chat[0]['id']),
+                          await supabase.client.from('bookmarks').upsert([
+                            {
+                              'owner': supabase.client.auth.currentUser!.id,
+                              'post_id': item['id'],
+                            }
+                          ]);
+                        },
+                        child: Text('Save'),
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).inputDecorationTheme.fillColor,
+                        ),
                       ),
-                    );
-                  },
-                  child: Text('Ping', style: TextStyle(color: Colors.white)),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+                item['author_id'] != supabase.client.auth.currentUser?.id
+                    ? TextButton(
+                        onPressed: () async {
+                          // add myself and the owner to the chat
+
+                          // create a new chat
+                          final chat =
+                              await supabase.client.from('chats').insert({
+                            'participants': [
+                              supabase.client.auth.currentUser!.id,
+                              item['author_id']
+                            ],
+                            'title':
+                                'Chat from ${supabase.client.auth.currentUser!.userMetadata?['display_name'] ?? supabase.client.auth.currentUser!.email}',
+                          }).select();
+
+                          // navigate to the chat screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ChatPage(chatId: chat[0]['id']),
+                            ),
+                          );
+                        },
+                        child:
+                            Text('Ping', style: TextStyle(color: Colors.white)),
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                        ),
+                      )
+                    : Container(),
               ],
             ),
           ],

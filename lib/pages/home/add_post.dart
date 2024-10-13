@@ -91,13 +91,12 @@ class _AddPostPageState extends State<AddPostPage> {
         throw Exception('Failed to add post');
       }
 
-      // Close loading indicator
-      Navigator.of(context).pop();
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Post added successfully')),
       );
-      Navigator.of(context).pop(); // Return to previous screen
+      Navigator.of(context).popUntil(
+        ModalRoute.withName(Navigator.defaultRouteName),
+      );
     } catch (e) {
       // Close loading indicator
       Navigator.of(context).pop();
